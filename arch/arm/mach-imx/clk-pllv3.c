@@ -13,6 +13,7 @@
 #include <linux/clk.h>
 #include <linux/clk-provider.h>
 #include <linux/delay.h>
+#include <linux/wait.h>
 #include <linux/imx_sema4.h>
 #include <linux/io.h>
 #include <linux/slab.h>
