@@ -1,3 +1,18 @@
+The v3.14/dey-2.0/rtpreemt branch have apply the RT PREEMPT in kernel and can build Kernel zImage itself.
+To make uImage for DEY 2.0, please use "make LOADADDR=0X10800000 uImage"
+Know issue: Although RT patch is ok for kernel, there's still some work need to do to fix vivante kernel driver with RT issue.
+bitbake core-image-base wont pass because of those kernel driver doesn't use the patch for RT support.
+
+to debug and fix issue. modify the linux_dey-3.14.bb and add
+
+SRC_URI = "git://github.com/peyoot/linux.git;branch=v3.14/dey-2.0/rt-preempt/ file://defconfig"
+
+also download the  arch/arm/configs/ccimx6sbc_rt_defconfig to replace the defconfig in dey source.
+
+
+
+
+
         Linux kernel release 3.x <http://kernel.org/>
 
 These are the release notes for Linux version 3.  Read them carefully,
