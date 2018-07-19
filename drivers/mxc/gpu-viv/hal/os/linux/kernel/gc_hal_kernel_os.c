@@ -7362,7 +7362,7 @@ gckOS_WaitSignal(
 
     might_sleep();
 
-    spin_lock_irq(&signal->obj.wait.lock);
+    raw_spin_lock_irq(&signal->obj.wait.lock);
 
     if (signal->obj.done)
     {
@@ -7384,9 +7384,8 @@ gckOS_WaitSignal(
             ? MAX_SCHEDULE_TIMEOUT
             : Wait * HZ / 1000;
 
-        DECLARE_WAITQUEUE(wait, current);
-        wait.flags |= WQ_FLAG_EXCLUSIVE;
-        __add_wait_queue_tail(&signal->obj.wait, &wait);
+        DEFINE_SWAITER(wait);
+        swait_prepare_locked(&signal->obj.wait, &wait);
 
         while (gcvTRUE)
         {
@@ -7398,9 +7397,9 @@ gckOS_WaitSignal(
             }
 
             __set_current_state(TASK_INTERRUPTIBLE);
-            spin_unlock_irq(&signal->obj.wait.lock);
+            raw_spin_unlock_irq(&signal->obj.wait.lock);
             timeout = schedule_timeout(timeout);
-            spin_lock_irq(&signal->obj.wait.lock);
+            raw_spin_lock_irq(&signal->obj.wait.lock);
 
             if (signal->obj.done)
             {
@@ -7421,10 +7420,10 @@ gckOS_WaitSignal(
             }
         }
 
-        __remove_wait_queue(&signal->obj.wait, &wait);
+        swait_finish_locked(&signal->obj.wait, &wait);
     }
 
-    spin_unlock_irq(&signal->obj.wait.lock);
+    raw_spin_unlock_irq(&signal->obj.wait.lock);
 
 OnError:
     /* Return status. */
